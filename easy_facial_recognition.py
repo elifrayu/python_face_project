@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     print('[INFO] Faces well imported')
     print('[INFO] Starting Webcam...')
-    video_capture = cv2.VideoCapture(0)
+    video_capture = cv2.VideoCapture(1)
     print('[INFO] Webcam well started')
     print('[INFO] Detecting...')
     while True:
@@ -121,5 +121,7 @@ if __name__ == '__main__':
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     print('[INFO] Stopping System')
+
+
     video_capture.release()
     cv2.destroyAllWindows()
