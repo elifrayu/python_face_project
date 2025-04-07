@@ -31,16 +31,26 @@ def transform(image, face_locations):
 
 
 def encode_face(image):
+    # 💡 OpenCV'den gelen görüntü BGR, biz RGB'ye çevirmeliyiz:
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
     face_locations = face_detector(image, 1)
     face_encodings_list = []
     landmarks_list = []
+
     for face_location in face_locations:
-        # DETECT FACES
         shape = pose_predictor_68_point(image, face_location)
-        face_encodings_list.append(np.array(face_encoder.compute_face_descriptor(image, shape, num_jitters=1)))
-        # GET LANDMARKS
-        shape = face_utils.shape_to_np(shape)
-        landmarks_list.append(shape)
+
+        try:
+            descriptor = face_encoder.compute_face_descriptor(image, shape, num_jitters=1)
+            face_encodings_list.append(np.array(descriptor))
+        except Exception as e:
+            print(f"[ERROR] Face encoding failed: {e}")
+            continue
+
+        shape_np = face_utils.shape_to_np(shape)
+        landmarks_list.append(shape_np)
+
     face_locations = transform(image, face_locations)
     return face_encodings_list, face_locations, landmarks_list
 
@@ -95,13 +105,13 @@ if __name__ == '__main__':
     known_face_encodings = []
     for file_ in files:
         image = PIL.Image.open(file_)
-        image = np.array(image)
+        image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
         face_encoded = encode_face(image)[0][0]
         known_face_encodings.append(face_encoded)
 
     print('[INFO] Faces well imported')
     print('[INFO] Starting Webcam...')
-    video_capture = cv2.VideoCapture(0)
+    video_capture = cv2.VideoCapture(1)
     print('[INFO] Webcam well started')
     print('[INFO] Detecting...')
     while True:
